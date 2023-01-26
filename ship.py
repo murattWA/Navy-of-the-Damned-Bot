@@ -64,3 +64,16 @@ class Board():
             l = [random.randint(0, 2), random.randint(0, 2)]
         return l
 
+    def print_board(self):
+        """Prints the game board row by row so it looks like an array. use this if your playing the game in cmd or something. or debuging like me :D
+        """
+
+        for row in self.board:
+            print(row)
+
+
+ship = Ship()
+ship.start_game("mo")
+ship.p1.print_board()
+print("--")
+ship.p2.print_board()
