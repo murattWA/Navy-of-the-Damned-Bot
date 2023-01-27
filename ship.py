@@ -8,7 +8,7 @@ class Ship():
         pass
 
     # TODO add self.mode as a attribute to for game logic to know its playing as an ai
-    
+
     def start_game(self, member: str):
         """creates new game against arg: member
 
@@ -27,7 +27,8 @@ class Ship():
         pass
 
     # TODO game logic will go in here as methods attack(), check_winner(), etc.
-    
+
+
 class Board():
     """Handles all board logic. dont use 'board' as instance name since thats used in the class. new_board() is called on init."""
 
@@ -35,12 +36,12 @@ class Board():
         self.new_board()
 
     def new_board(self):
-        """IMPORTANT: when accessing or using x,y coord in self.board remember that its y first then x
+        """IMPORTANT: when coding self.board remember that its y first then x, but when accesing self.board or update_board() its user-friendly x is first then y.
         
         Sets: new board and ship positions
         
         Example:
-        for cood (1,2) you would use self.board[2][1]
+        for cord (1,2) you would use self.board[2][1]
         """
         # player board and ships
         self.board = [[' ' for x in range(3)] for y in range(3)]
@@ -48,6 +49,26 @@ class Board():
         self.ship2 = self.gen_cord(self.ship1)
         self.board[self.ship1[1]][self.ship1[0]] = "X"
         self.board[self.ship2[1]][self.ship2[0]] = "X"
+
+    def update_board(self, symbol: str, *cords: list) -> bool:
+        """Update self.board to a particular "symbol" at a particular "cord." returns Bool hit if a ship was in any of the provided cords. You can update as many cords as you want in one function but all will be updated to only one symbol. likewise with the return only one return will be provided even if multiple ships were hit. for more granularity use separate functions for separate cords.
+
+        Args:
+            symbol (str): the symbol you would like to place at cord.
+            *cord (list): the cords you would like to update to symbol
+
+        Returns:
+            bool: hit true or false if any ship was hit.
+        """
+
+        hit = False
+        for cord in cords:
+            if self.board[cord[1]][cord[0]] == "X":
+                hit = True
+                self.board[cord[1]][cord[0]] = "/"
+            else:
+                self.board[cord[1]][cord[0]] = symbol
+        return hit
 
     def gen_cord(self, *exclude: list) -> list:
         """generates random list len=2 to be used as x,y coors for board piece placement.
@@ -77,3 +98,6 @@ ship.start_game("mo")
 ship.p1.print_board()
 print("--")
 ship.p2.print_board()
+print("--")
+ship.p1.update_board("*", [0, 1], [1, 2])
+ship.p1.print_board()
