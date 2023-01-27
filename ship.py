@@ -26,8 +26,6 @@ class Ship():
             self.p2 = Board()
         pass
 
-    # TODO game logic will go in here as methods attack(), check_winner(), etc.
-
 
 class Board():
     """Handles all board logic. dont use 'board' as instance name since thats used in the class. new_board() is called on init."""
@@ -85,6 +83,18 @@ class Board():
             l = [random.randint(0, 2), random.randint(0, 2)]
         return l
 
+    def check_winner(self) -> bool:
+        """iterates over each row in self.board to check if "X" in row. if it finds "X" it breaks loops and returns False. if it reaches the end of self.board and doesnt find "X" then returns True
+
+        Returns:
+            bool: True = winner
+        """
+
+        for row in self.board:
+            if "X" in row:
+                return False
+        return True
+
     def print_board(self):
         """Prints the game board row by row so it looks like an array. use this if your playing the game in cmd or something. or debuging like me :D
         """
@@ -93,11 +103,15 @@ class Board():
             print(row)
 
 
-ship = Ship()
-ship.start_game("mo")
-ship.p1.print_board()
-print("--")
-ship.p2.print_board()
-print("--")
-ship.p1.update_board("*", [0, 1], [1, 2])
-ship.p1.print_board()
+# use for debugging
+# ship = Ship()
+# ship.start_game("mo")
+# ship.p1.print_board()
+# print("--")
+# ship.p2.print_board()
+# print("--")
+# ship.p1.update_board("*", [0, 1], [1, 2], [0, 0], [0, 2], [1, 0], [1, 1])
+# ship.p1.print_board()
+# print(ship.p1.check_winner())
+
+
