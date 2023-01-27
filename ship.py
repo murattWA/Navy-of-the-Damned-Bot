@@ -28,44 +28,51 @@ class Ship():
 
 
 class Board():
-    """Handles all board logic. dont use 'board' as instance name since thats used in the class. new_board() is called on init."""
+    """Handles all board logic. dont use 'board' as instance name since thats used in the class. new_board() is called on init. note that self.board stores your boats and enemy missile location. whereas self.hits stores only where you've sent missiles to already."""
 
     def __init__(self):
         self.new_board()
 
     def new_board(self):
-        """IMPORTANT: when coding self.board remember that its y first then x, but when accesing self.board or update_board() its user-friendly x is first then y.
+        """IMPORTANT: when coding self.board remember that its y first then x, but when accessing self.board or update_board() its user-friendly x is first then y.
         
-        Sets: new board and ship positions
+        Sets: new board & hits table and ship positions
         
         Example:
         for cord (1,2) you would use self.board[2][1]
         """
         # player board and ships
         self.board = [[' ' for x in range(3)] for y in range(3)]
+        self.hits = [[' ' for x in range(3)] for y in range(3)]
         self.ship1 = self.gen_cord()
         self.ship2 = self.gen_cord(self.ship1)
         self.board[self.ship1[1]][self.ship1[0]] = "X"
         self.board[self.ship2[1]][self.ship2[0]] = "X"
 
-    def update_board(self, symbol: str, *cords: list) -> bool:
-        """Update self.board to a particular "symbol" at a particular "cord." returns Bool hit if a ship was in any of the provided cords. You can update as many cords as you want in one function but all will be updated to only one symbol. likewise with the return only one return will be provided even if multiple ships were hit. for more granularity use separate functions for separate cords.
+    def update_board(self, symbol: str, hits: bool, *cords: list) -> bool:
+        """Update self.board and self.hits(if hits is True) to a particular "symbol" at a particular "cord." 
+        
+        returns Bool hit if a ship was in any of the provided cords. You can update as many cords as you want in one function but all will be updated to only one symbol. likewise with the return only one return will be provided even if multiple ships were hit. for more granularity use separate functions for separate cords.
 
         Args:
             symbol (str): the symbol you would like to place at cord.
+            hits (bool): set True if you would like to update self.hits
             *cord (list): the cords you would like to update to symbol
 
         Returns:
-            bool: hit true or false if any ship was hit.
+            bool: hit true or false if any ship was hit only if updating self.board. will still return false if updating self.hits. use the return for when updating self.hits to put a different marker if a ship was hit
         """
 
         hit = False
         for cord in cords:
-            if self.board[cord[1]][cord[0]] == "X":
-                hit = True
-                self.board[cord[1]][cord[0]] = "/"
+            if hits:
+                self.hits[cord[1]][cord[0]] = symbol
             else:
-                self.board[cord[1]][cord[0]] = symbol
+                if self.board[cord[1]][cord[0]] == "X":
+                    hit = True
+                    self.board[cord[1]][cord[0]] = symbol
+                else:
+                    self.board[cord[1]][cord[0]] = "*"
         return hit
 
     def gen_cord(self, *exclude: list) -> list:
@@ -95,12 +102,16 @@ class Board():
                 return False
         return True
 
-    def print_board(self):
-        """Prints the game board row by row so it looks like an array. use this if your playing the game in cmd or something. or debuging like me :D
+    def print_board(self, hits: bool = False):
+        """Prints the game board if hits = (False by default) or hits board if hits = True row by row so it looks like an array. use this if your playing the game in cmd or something. or debuging like me :D
         """
 
-        for row in self.board:
-            print(row)
+        if hits:
+            for row in self.hits:
+                print(row)
+        else:
+            for row in self.board:
+                print(row)
 
 
 # use for debugging
@@ -113,5 +124,3 @@ class Board():
 # ship.p1.update_board("*", [0, 1], [1, 2], [0, 0], [0, 2], [1, 0], [1, 1])
 # ship.p1.print_board()
 # print(ship.p1.check_winner())
-
-
