@@ -19,6 +19,30 @@ bot = commands.Bot(
 )
 
 
+# ------------ CREATING BUTTON CLASS
+class Test(discord.ui.View):
+    """docstring for Confirm."""
+
+    def __init__(self):
+        super().__init__()
+        self.value = None
+        self.timeout = 5
+
+    @discord.ui.button(label="confirm", style=discord.ButtonStyle.green)
+    async def confirm(self, interaction: discord.Interaction,
+                      button: discord.ui.Button):
+        await interaction.response.send_message("Confirming")
+        self.value = True
+        self.stop()
+
+    @discord.ui.button(label="cancel", style=discord.ButtonStyle.grey, row=1)
+    async def cancel(self, interaction: discord.Interaction,
+                     button: discord.ui.Button):
+        await interaction.response.send_message("cancelling")
+        self.value = False
+        self.stop()
+
+
 # ------------ INIT BOT
 def run_discord_bot():
     """Called in main.py. Starts bot
@@ -49,8 +73,18 @@ async def help_command(interaction: discord.Interaction):
 # TODO add 'against' selector in the slash command before member
 @bot.tree.command(name="play",
                   description="Start a game against either AI or a friend.")
-async def play(interaction: discord.Interaction, member: discord.Member):
-    game = Ship()
-    game.start_game(member)
+async def play(interaction: discord.Interaction):
+    view = Test()
     await interaction.response.send_message(
-        f"You really have nothing else to do... do you?!")
+        "Your turn, where would you like to attack?", view=view)
+    if view.value is None:
+        print("timed out..")
+    elif view.value:
+        print("confirmed")
+    else:
+        print("canceled")
+
+
+if __name__ == "__main__":
+    # run the bot
+    run_discord_bot()
