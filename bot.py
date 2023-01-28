@@ -35,8 +35,29 @@ class Test(discord.ui.Button):
     async def callback(self, interaction: discord.Interaction):
         assert self.view is not None
         view: Game = self.view
-        self.style = discord.ButtonStyle.success
-        await interaction.response.edit_message(view=view)
+        ship = view.ship
+
+        is_sunk = ship.p2.update_board("/", False,
+                                       [self.x, self.y])  # update there board
+        if is_sunk:
+            ship.p1.update_board("/", True,
+                                 [self.x, self.y])  # update your hits board
+            self.style = discord.ButtonStyle.success
+            content = "HIT! Where would you like to strike next?"
+        else:
+            ship.p1.update_board("*", True,
+                                 [self.x, self.y])  # update your hits board
+            self.style = discord.ButtonStyle.danger
+            content = "Miss! Where would you like to strike next?"
+
+        if ship.p2.check_winner():
+            print("You Win!")
+            content = "You Win!"
+            view.stop()
+            for child in view.children:
+                child.disabled = True
+
+        await interaction.response.edit_message(content=content, view=view)
 
     # @discord.ui.button(label="confirm", style=discord.ButtonStyle.green)
     # async def confirm(self, interaction: discord.Interaction,
@@ -64,16 +85,19 @@ class Game(discord.ui.View):
         self.player2 = "player2"
         self.ship = Ship()
         self.ship.start_game(self.player1)
-        board = self.ship.p2.hits
+        hits = self.ship.p2.hits
 
         # creating the buttons according to ship.board
         y = 0
-        for row in board:
+        for row in hits:
             x = 0
             for space in row:
                 self.add_item(Test(x, y, space))
                 x += 1
             y += 1
+
+        # debugging
+        self.ship.p2.print_board()
 
 
 # ------------ INIT BOT
