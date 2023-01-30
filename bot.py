@@ -36,6 +36,8 @@ class Test(discord.ui.Button):
         assert self.view is not None
         view: Game = self.view
         ship = view.ship
+        await interaction.followup.delete_message()
+        
 
         is_sunk = ship.p2.update_board("/", False,
                                        [self.x, self.y])  # update there board

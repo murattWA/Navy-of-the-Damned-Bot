@@ -76,7 +76,12 @@ class Board():
         return hit
 
     def gen_cord(self, *exclude: list) -> list:
-        """generates random list len=2 to be used as x,y coors for board piece placement.
+        """generates random list len=2 to be used as x,y coors for board piece placement. keep in mind you should store your exclusions in a list and pass that unpacked list.
+        
+        Example:
+            exclusions = [[0,0],[0,1],[0,2]]
+            gen_cord(*exclusions)
+            it is important to use "*"
 
         Inputs:
             list: unlimited list values. these lists will be ignored in generation logic
@@ -84,7 +89,6 @@ class Board():
         Returns:
             list: returns a list that is unique compared to *exclude args
         """
-
         l = [random.randint(0, 2), random.randint(0, 2)]
         while l in exclude:
             l = [random.randint(0, 2), random.randint(0, 2)]
@@ -112,15 +116,3 @@ class Board():
         else:
             for row in self.board:
                 print(row)
-
-
-# use for debugging
-# ship = Ship()
-# ship.start_game("mo")
-# ship.p1.print_board()
-# print("--")
-# ship.p2.print_board()
-# print("--")
-# ship.p1.update_board("*", [0, 1], [1, 2], [0, 0], [0, 2], [1, 0], [1, 1])
-# ship.p1.print_board()
-# print(ship.p1.check_winner())
