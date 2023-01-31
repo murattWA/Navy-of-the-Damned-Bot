@@ -1,6 +1,6 @@
 import random
 
-from ascii import ascii_board
+from ascii import ascii_board2
 
 
 class Ship():
@@ -133,16 +133,16 @@ class Board():
         # cords are placeholders in the ascii image to be replaced
         cords = ["1", "2", "3", "4", "5", "6", "7", "8", "9"]
         icords = iter(cords)
-        self.ascii = ascii_board
+        self.ascii = ascii_board2
 
         for row in board:
             for spot in row:
                 num = next(icords)
                 if spot == "X":  # ship
-                    self.ascii = self.ascii.replace(num, "X")
+                    self.ascii = self.ascii.replace(num, "⏅")
                 elif spot == "/":  # sunken ship
-                    self.ascii = self.ascii.replace(num, "/")
+                    self.ascii = self.ascii.replace(num, "⌇")
                 elif spot == "*":  # miss
-                    self.ascii = self.ascii.replace(num, "*")
+                    self.ascii = self.ascii.replace(num, "⦿")
                 else:  #emply space
                     self.ascii = self.ascii.replace(num, " ")
