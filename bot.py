@@ -144,7 +144,29 @@ async def play(interaction: discord.Interaction):
     view = Game()
     await interaction.response.send_message(
         "Your turn, where would you like to attack?", view=view)
-    view.followup_msg = await interaction.followup.send("first",ephemeral=True)
+    view.followup_msg = await interaction.followup.send("first",
+                                                        ephemeral=True)
+
+
+@bot.tree.command(name="art", description="print out a cool piece of art.")
+async def art(interaction: discord.Interaction):
+    await interaction.response.send_message("""```
+                                     |__
+                                     |\/
+                                     ---
+                                     / | [
+                              !      | |||
+                            _/|     _/|-++'
+                        +  +--|    |--|--|_ |-
+                     { /|__|  |/\__|  |--- |||__/
+                    +---------------___[}-_===_.'____                 /\
+                ____`-' ||___-{]_| _[}-  |     |_[___\==--            \/   _
+ __..._____--==/___]_|__|_____________________________[___\==--____,------' .7
+|                                                                     BB-61/
+ \_________________________________________________________________________|
+                              Navy of the Damned
+                             By Muhammed and Murad
+ ```""")
 
 
 if __name__ == "__main__":  # remove this section when done
