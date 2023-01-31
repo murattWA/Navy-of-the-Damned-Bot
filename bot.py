@@ -36,8 +36,7 @@ class Test(discord.ui.Button):
         assert self.view is not None
         view: Game = self.view
         ship = view.ship
-        await interaction.followup.delete_message()
-        
+        reply: str
 
         is_sunk = ship.p2.update_board("/", False,
                                        [self.x, self.y])  # update there board
@@ -46,20 +45,24 @@ class Test(discord.ui.Button):
                                  [self.x, self.y])  # update your hits board
             self.style = discord.ButtonStyle.success
             content = "HIT! Where would you like to strike next?"
+            reply = "Hit!"
         else:
             ship.p1.update_board("*", True,
                                  [self.x, self.y])  # update your hits board
             self.style = discord.ButtonStyle.danger
             content = "Miss! Where would you like to strike next?"
+            reply = "Miss!"
 
         if ship.p2.check_winner():
             print("You Win!")
             content = "You Win!"
+            reply = "You Win!"
             view.stop()
             for child in view.children:
                 child.disabled = True
 
         await interaction.response.edit_message(content=content, view=view)
+        await view.edit_followup_msg(reply)
 
     # @discord.ui.button(label="confirm", style=discord.ButtonStyle.green)
     # async def confirm(self, interaction: discord.Interaction,
@@ -88,6 +91,7 @@ class Game(discord.ui.View):
         self.ship = Ship()
         self.ship.start_game(self.player1)
         hits = self.ship.p2.hits
+        self.followup_msg: discord.Message = None
 
         # creating the buttons according to ship.board
         y = 0
@@ -100,6 +104,10 @@ class Game(discord.ui.View):
 
         # debugging
         self.ship.p2.print_board()
+
+    async def edit_followup_msg(self, new_msg):
+        if self.followup_msg:
+            await self.followup_msg.edit(content=new_msg)
 
 
 # ------------ INIT BOT
@@ -136,6 +144,7 @@ async def play(interaction: discord.Interaction):
     view = Game()
     await interaction.response.send_message(
         "Your turn, where would you like to attack?", view=view)
+    view.followup_msg = await interaction.followup.send("first",ephemeral=True)
 
 
 if __name__ == "__main__":  # remove this section when done
