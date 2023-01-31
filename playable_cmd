@@ -31,7 +31,7 @@ while game_on:
     print("your board")
     ship.p1.print_board(True)
     print("")
-    ship.p1.print_board(hits=False)
+    print(ship.p1.ascii)
     if winner:
         print("You Win!")
         break
@@ -43,6 +43,7 @@ while game_on:
     x = int(input("attack x coord?\n"))
     y = int(input("attack y coord?\n"))
     is_sunk = ship.p2.update_board("/", False, [x, y])  # update there board
+    ship.p2.gen_ascii()  #update there ascii board
     if is_sunk:
         ship.p1.update_board("/", True, [x, y])  # update your hits board
     else:
@@ -55,6 +56,7 @@ while game_on:
     missile = ship.p1.gen_cord(*exclusions)
     exclusions.append(missile)
     is_sunk = ship.p1.update_board("/", False, missile)  # updates your board
+    ship.p1.gen_ascii()  #update your ascii board
     if is_sunk:
         ship.p2.update_board("/", True, missile)  #updates there hits board
     else:

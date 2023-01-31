@@ -1,5 +1,7 @@
 import random
 
+from ascii import ascii_board
+
 
 class Ship():
     """Handles all game logic. both players get 2 boats. each boat is 1 unit wide due to discord api limits"""
@@ -32,6 +34,7 @@ class Board():
 
     def __init__(self):
         self.new_board()
+        self.gen_ascii()
 
     def new_board(self):
         """IMPORTANT: when coding self.board remember that its y first then x, but when accessing self.board or update_board() its user-friendly x is first then y.
@@ -116,3 +119,30 @@ class Board():
         else:
             for row in self.board:
                 print(row)
+
+    def gen_ascii(self, board=None):
+        """Generates a new ascii board using ascii_board which is accessable via self.ascii. this is run automatically on init and update_board().
+
+        Args:
+            board, optional: if not specified Defaults to None and will use current instance of self.board.
+        """
+
+        if board == None:
+            board = self.board
+
+        # cords are placeholders in the ascii image to be replaced
+        cords = ["1", "2", "3", "4", "5", "6", "7", "8", "9"]
+        icords = iter(cords)
+        self.ascii = ascii_board
+
+        for row in board:
+            for spot in row:
+                num = next(icords)
+                if spot == "X":  # ship
+                    self.ascii = self.ascii.replace(num, "X")
+                elif spot == "/":  # sunken ship
+                    self.ascii = self.ascii.replace(num, "/")
+                elif spot == "*":  # miss
+                    self.ascii = self.ascii.replace(num, "*")
+                else:  #emply space
+                    self.ascii = self.ascii.replace(num, " ")
