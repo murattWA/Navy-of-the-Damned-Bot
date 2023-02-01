@@ -36,8 +36,8 @@ class Test(discord.ui.Button):
         assert self.view is not None
         view: Game = self.view
         ship = view.ship
-        reply: str
 
+        # player turn below
         is_sunk = ship.p2.update_board("/", False,
                                        [self.x, self.y])  # update there board
         if is_sunk:
@@ -45,24 +45,41 @@ class Test(discord.ui.Button):
                                  [self.x, self.y])  # update your hits board
             self.style = discord.ButtonStyle.success
             content = "HIT! Where would you like to strike next?"
-            reply = "Hit!"
         else:
             ship.p1.update_board("*", True,
                                  [self.x, self.y])  # update your hits board
             self.style = discord.ButtonStyle.danger
             content = "Miss! Where would you like to strike next?"
-            reply = "Miss!"
 
         if ship.p2.check_winner():
-            print("You Win!")
-            content = "You Win!"
-            reply = "You Win!"
+            content = "**You Win!**"
+            print(content)
             view.stop()
             for child in view.children:
                 child.disabled = True
 
+        # ai turn below
+        else:
+            missile = ship.p1.gen_cord(*view.exclusions)
+            view.exclusions.append(missile)
+            is_sunk = ship.p1.update_board("/", False,
+                                           missile)  # updates player board
+            if is_sunk:
+                ship.p2.update_board("/", True,
+                                     missile)  #updates ai hits board
+            else:
+                ship.p2.update_board("*", True,
+                                     missile)  #updates ai hits board
+
+            if ship.p1.check_winner():
+                content = "**Sorry our ai is TOO POWERFUL, you lose...**"
+                view.stop()
+                for child in view.children:
+                    child.disabled = True
+
+        self.disabled = True
         await interaction.response.edit_message(content=content, view=view)
-        await view.edit_followup_msg(reply)
+        await view.edit_followup_msg(view.ship.p1.ascii)
 
     # @discord.ui.button(label="confirm", style=discord.ButtonStyle.green)
     # async def confirm(self, interaction: discord.Interaction,
@@ -92,6 +109,7 @@ class Game(discord.ui.View):
         self.ship.start_game(self.player1)
         hits = self.ship.p2.hits
         self.followup_msg: discord.Message = None
+        self.exclusions: list = []  # list of ai moves taken
 
         # creating the buttons according to ship.board
         y = 0
@@ -144,7 +162,7 @@ async def play(interaction: discord.Interaction):
     view = Game()
     await interaction.response.send_message(
         "Your turn, where would you like to attack?", view=view)
-    view.followup_msg = await interaction.followup.send("first",
+    view.followup_msg = await interaction.followup.send(view.ship.p1.ascii,
                                                         ephemeral=True)
 
 

@@ -76,6 +76,7 @@ class Board():
                     self.board[cord[1]][cord[0]] = symbol
                 else:
                     self.board[cord[1]][cord[0]] = "*"
+        self.gen_ascii()
         return hit
 
     def gen_cord(self, *exclude: list) -> list:
@@ -139,10 +140,10 @@ class Board():
             for spot in row:
                 num = next(icords)
                 if spot == "X":  # ship
-                    self.ascii = self.ascii.replace(num, "⏅")
+                    self.ascii = self.ascii.replace(num, "X")
                 elif spot == "/":  # sunken ship
-                    self.ascii = self.ascii.replace(num, "⌇")
+                    self.ascii = self.ascii.replace(num, "@")
                 elif spot == "*":  # miss
-                    self.ascii = self.ascii.replace(num, "⦿")
+                    self.ascii = self.ascii.replace(num, "*")
                 else:  #emply space
                     self.ascii = self.ascii.replace(num, " ")
