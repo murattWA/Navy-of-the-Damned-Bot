@@ -5,6 +5,7 @@ import discord
 from discord.ext import commands
 from dotenv import find_dotenv, load_dotenv
 
+from ascii import art
 from ship import Ship
 
 dotenv_path = find_dotenv()
@@ -20,9 +21,17 @@ bot = commands.Bot(
 )
 
 
-# ------------ CREATING BUTTON CLASS
-class Test(discord.ui.Button):
-    """docstring for Confirm."""
+# ------------ CREATING BUTTONS WHICH CONTAIN GAME LOGIC
+class GridButton(discord.ui.Button):
+    """button created by Game() class. contains most game logic.
+
+    Methods:
+        callback (discord.Interaction): on click of specific button. Ship() contained in Game() will update players boards with either "/" if hit or "*" if miss. content will be changed accordingly and passed into response.edit_message()
+        
+        after player1's turn ship will check if player1 has won if so buttons will disable and ai will not get a turn. else ai will take a turn and update players boards.
+        
+        at the very end both initial message with buttons and followup will be updated properly
+    """
 
     def __init__(self, x: int, y: int, label: str):
         super().__init__(style=discord.ButtonStyle.secondary,
@@ -37,7 +46,7 @@ class Test(discord.ui.Button):
         view: Game = self.view
         ship = view.ship
 
-        # player turn below
+        # player turn logic
         is_sunk = ship.p2.update_board("/", False,
                                        [self.x, self.y])  # update there board
         if is_sunk:
@@ -53,12 +62,11 @@ class Test(discord.ui.Button):
 
         if ship.p2.check_winner():
             content = "**You Win!**"
-            print(content)
             view.stop()
             for child in view.children:
                 child.disabled = True
 
-        # ai turn below
+        # ai turn (does not execute if player wins)
         else:
             missile = ship.p1.gen_cord(*view.exclusions)
             view.exclusions.append(missile)
@@ -77,29 +85,26 @@ class Test(discord.ui.Button):
                 for child in view.children:
                     child.disabled = True
 
-        self.disabled = True
+        self.disabled = True  # disable current button that was clicked
         await interaction.response.edit_message(content=content, view=view)
         await view.edit_followup_msg(view.ship.p1.ascii)
-
-    # @discord.ui.button(label="confirm", style=discord.ButtonStyle.green)
-    # async def confirm(self, interaction: discord.Interaction,
-    #                   button: discord.ui.Button):
-    #     await interaction.response.send_message("Confirming")
-    #     self.value = True
-    #     self.stop()
-
-    # @discord.ui.button(label="cancel", style=discord.ButtonStyle.grey, row=1)
-    # async def cancel(self, interaction: discord.Interaction,
-    #                  button: discord.ui.Button):
-    #     await interaction.response.send_message("cancelling")
-    #     self.value = False
-    #     self.stop()
 
 
 # ------------ GAME CLASS CREATION -> THE DISCORD.UI.VIEW
 class Game(discord.ui.View):
-    """docstring for Game."""
-    children: List[Test]
+    """game logic from Ship(). This class is only ran once after the initial slash command. Creates new Ship() game and discord.ui.View.Button 's in the same grid sequence as ship.p2.board
+
+    Attributes:
+        player1 (str): name of player1
+        player2 (str): name of player2
+        ship (Class): Ship() class
+        hits : hits board from ship for ease of use
+        followup_msg (str): the attribute used to store the initial followup message
+        exclusions (list): list of coordinates the ai has already taken
+    Methods:
+        edit_followup_msg(): used to change the followup message sent to player. 
+    """
+    children: List[GridButton]
 
     def __init__(self):
         super().__init__()
@@ -109,21 +114,23 @@ class Game(discord.ui.View):
         self.ship.start_game(self.player1)
         hits = self.ship.p2.hits
         self.followup_msg: discord.Message = None
-        self.exclusions: list = []  # list of ai moves taken
+        self.exclusions: list = []
 
         # creating the buttons according to ship.board
         y = 0
         for row in hits:
             x = 0
             for space in row:
-                self.add_item(Test(x, y, space))
+                self.add_item(GridButton(x, y, space))
                 x += 1
             y += 1
 
-        # debugging
-        self.ship.p2.print_board()
-
     async def edit_followup_msg(self, new_msg):
+        """used to change the followup message sent to player. 
+
+        Args:
+            new_msg (str): the new message you wish to edit followup_msg with
+        """
         if self.followup_msg:
             await self.followup_msg.edit(content=new_msg)
 
@@ -166,27 +173,11 @@ async def play(interaction: discord.Interaction):
                                                         ephemeral=True)
 
 
-@bot.tree.command(name="art", description="print out a cool piece of art.")
-async def art(interaction: discord.Interaction):
-    await interaction.response.send_message("""```
-                                     |__
-                                     |\/
-                                     ---
-                                     / | [
-                              !      | |||
-                            _/|     _/|-++'
-                        +  +--|    |--|--|_ |-
-                     { /|__|  |/\__|  |--- |||__/
-                    +---------------___[}-_===_.'____                 /\
-                ____`-' ||___-{]_| _[}-  |     |_[___\==--            \/   _
- __..._____--==/___]_|__|_____________________________[___\==--____,------' .7
-|                                                                     BB-61/
- \_________________________________________________________________________|
-                              Navy of the Damned
-                             By Muhammed and Murad
- ```""")
+@bot.tree.command(name="art", description="Print out a cool piece of art.")
+async def artt(interaction: discord.Interaction):
+    await interaction.response.send_message(art)
 
 
-if __name__ == "__main__":  # remove this section when done
+if __name__ == "__main__":
     # run the bot
     run_discord_bot()
