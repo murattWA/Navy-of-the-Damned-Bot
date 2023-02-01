@@ -11,6 +11,9 @@ def sclr():
 game_on = True
 ship = Ship()
 ship.start_game("mo")
+exclusions = []
+winner = False
+loser = False
 
 while game_on:
     sclr()
@@ -28,7 +31,13 @@ while game_on:
     print("your board")
     ship.p1.print_board(True)
     print("")
-    ship.p1.print_board(hits=False)
+    print(ship.p1.ascii)
+    if winner:
+        print("You Win!")
+        break
+    if loser:
+        print("Sorry you lost!")
+        break
 
     # your turn (p1)
     x = int(input("attack x coord?\n"))
@@ -38,20 +47,18 @@ while game_on:
         ship.p1.update_board("/", True, [x, y])  # update your hits board
     else:
         ship.p1.update_board("*", True, [x, y])  # update your hits board
-
     if ship.p2.check_winner():
-        print("You Win!")
-        break
+        winner = True
+        pass  # if player wins skip ai turn
 
     # ai's turn
-    missile = ship.p1.gen_cord()
+    missile = ship.p1.gen_cord(*exclusions)
+    exclusions.append(missile)
     is_sunk = ship.p1.update_board("/", False, missile)  # updates your board
-
     if is_sunk:
         ship.p2.update_board("/", True, missile)  #updates there hits board
     else:
         ship.p2.update_board("*", True, missile)  #updates there hits board
-
     if ship.p1.check_winner():
-        print("Sorry you lost!")
-        break
+        loser = True
+        pass

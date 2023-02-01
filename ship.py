@@ -1,5 +1,7 @@
 import random
 
+from ascii import ascii_board2
+
 
 class Ship():
     """Handles all game logic. both players get 2 boats. each boat is 1 unit wide due to discord api limits"""
@@ -32,6 +34,7 @@ class Board():
 
     def __init__(self):
         self.new_board()
+        self.gen_ascii()
 
     def new_board(self):
         """IMPORTANT: when coding self.board remember that its y first then x, but when accessing self.board or update_board() its user-friendly x is first then y.
@@ -73,10 +76,16 @@ class Board():
                     self.board[cord[1]][cord[0]] = symbol
                 else:
                     self.board[cord[1]][cord[0]] = "*"
+        self.gen_ascii()
         return hit
 
     def gen_cord(self, *exclude: list) -> list:
-        """generates random list len=2 to be used as x,y coors for board piece placement.
+        """generates random list len=2 to be used as x,y coors for board piece placement. keep in mind you should store your exclusions in a list and pass that unpacked list.
+        
+        Example:
+            exclusions = [[0,0],[0,1],[0,2]]
+            gen_cord(*exclusions)
+            it is important to use "*"
 
         Inputs:
             list: unlimited list values. these lists will be ignored in generation logic
@@ -84,7 +93,6 @@ class Board():
         Returns:
             list: returns a list that is unique compared to *exclude args
         """
-
         l = [random.randint(0, 2), random.randint(0, 2)]
         while l in exclude:
             l = [random.randint(0, 2), random.randint(0, 2)]
@@ -113,14 +121,29 @@ class Board():
             for row in self.board:
                 print(row)
 
+    def gen_ascii(self, board=None):
+        """Generates a new ascii board using ascii_board which is accessable via self.ascii. this is run automatically on init and update_board().
 
-# use for debugging
-# ship = Ship()
-# ship.start_game("mo")
-# ship.p1.print_board()
-# print("--")
-# ship.p2.print_board()
-# print("--")
-# ship.p1.update_board("*", [0, 1], [1, 2], [0, 0], [0, 2], [1, 0], [1, 1])
-# ship.p1.print_board()
-# print(ship.p1.check_winner())
+        Args:
+            board, optional: if not specified Defaults to None and will use current instance of self.board.
+        """
+
+        if board == None:
+            board = self.board
+
+        # cords are placeholders in the ascii image to be replaced
+        cords = ["1", "2", "3", "4", "5", "6", "7", "8", "9"]
+        icords = iter(cords)
+        self.ascii = ascii_board2
+
+        for row in board:
+            for spot in row:
+                num = next(icords)
+                if spot == "X":  # ship
+                    self.ascii = self.ascii.replace(num, "X")
+                elif spot == "/":  # sunken ship
+                    self.ascii = self.ascii.replace(num, "@")
+                elif spot == "*":  # miss
+                    self.ascii = self.ascii.replace(num, "*")
+                else:  #emply space
+                    self.ascii = self.ascii.replace(num, " ")
